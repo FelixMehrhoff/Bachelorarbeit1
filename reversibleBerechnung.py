@@ -1,81 +1,67 @@
 
 import xlsxwriter
 
+# requiredVariables
+Q_wholeHouse = [2.557, 2.884]  # kW
+T_flow = 70  # °C
+T_return = 60  # °C
+cp_water = 4.18  # kJ/(kg*K)
+Tm_12 = 10  # °C, maybe the outside temperature,  evaporation only in wet steam area
+s4 = 1.384  # kJ/kg*K
+s3 = 1.7716  # kJ/kg*K
+electricityPrice = 0.4  # €/kWh
+counter = 1
+result = []
 
-#benötigte Variablen
-Q_ganzesHaus = [2.557, 2.884] #kW
-T_vorlauf = 70  #°C
-T_ruecklauf = 36.5 #°C
-cp_wasser = 4.18 #kJ/(kg*K)
-Tm_12 = 10 #°C, vielleicht die Außentemperatur, Verdampfung nur im Nassdampfgebiet angenommen
-s4 = 1.384 #kJ/kg*K
-s3 = 1.7716 #kJ/kg*K
-strompreis=0.4 #€/kWh
-betriebstage=340
-zaehler = 1
-ergebnis = []
+for i in Q_wholeHouse:
+    # energy balance around the heating;
+    m_heatingCircuit = i / (cp_water * (T_flow - T_return))  # ideal liquid
 
+    # calculate specific q
+    q_heatDemand = i / m_heatingCircuit
 
-for i in Q_ganzesHaus:
+    # entropy balance around the isentropic heat exchanger
+    Tm_34 = q_heatDemand / (s3 - s4)
 
+    # specify day:
+    print("For day " + str(counter) + " applies: ")
 
-    #Energiebilanz um Heizung;
-    m_heizkreislauf = i/(cp_wasser*(T_vorlauf-T_ruecklauf)) # ist ideale Flüssigkeit i.O.?
+    # calculate and give out COP
+    COP = 1 / (1 - (Tm_12 + 273.15) / Tm_34)
+    print("The COP of the heat pump is: " + str(COP) + ".")
 
+    # calculate and giv out power of heat pump
+    P_el = i / COP
+    print("The power of the heat pump is" + str(P_el) + " kW.")
 
-    #kleines q berechnen
-    q_waermebedarf = i/m_heizkreislauf
+    # calculate and give out costs for electricity
+    cost = P_el * electricityPrice
+    print("The costs per hour are" + str(round(cost, 2)) + " €/kWh")
 
+    summary = [counter, round(COP, 2), round(P_el, 2), round(cost, 2)]
+    result.append(summary)
 
-    #Entropiebilanz um Wärmeübertrager, isentrop
-    Tm_34 = q_waermebedarf/(s3-s4)
+    # count up
+    counter = counter + 1
 
-    #Tag angeben:
+print(result)
 
-    print("Für Tag " + str(zaehler) + " gilt: ")
-
-
-    #COP berechnen und ausgeben
-    COP = 1/(1 - (Tm_12+273.15) / Tm_34)
-    print("Der COP der Wärmepumpe beträgt: " + str(COP) + ".")
-
-    #Wärmepumpenleistung berechnen und ausgeben
-    P_el = i/COP
-    print("Die Wärmepumpenleistung beträgt: " + str(P_el) + " kW.")
-
-
-
-    #Stromkosten berechnen und ausgeben
-    kosten = P_el*strompreis
-    print("Die Kosten pro Stunde betragen: " + str(round(kosten, 2)) + " €/kWh")
-
-    list =[zaehler, round(COP, 2), round(P_el, 2), round(kosten, 2)]
-    ergebnis.append(list)
-
-
-    # Zähler hochzählen
-    zaehler = zaehler + 1
-
-print(ergebnis)
-
-#Excel-Datei inizieren
-workbook = xlsxwriter.Workbook('Auswertung.xlsx')
+# create Excel-file
+workbook = xlsxwriter.Workbook('results.xlsx')
 worksheet = workbook.add_worksheet()
 worksheet.write('A1', 'Tag')
 worksheet.write('B1', 'COP')
-worksheet.write('C1', 'elektrische Leistung [kW]')
-worksheet.write('D1', 'Preis [€/kWh]')
+worksheet.write('C1', 'electrical power [kW]')
+worksheet.write('D1', 'price [€/kWh]')
 
-row=1
-col=0
+row = 1
+col = 0
 
-
-for day, cop, power, price in ergebnis:
+for day, cop, power, price in result:
     worksheet.write(row, col, day)
-    worksheet.write(row, col+1, cop)
-    worksheet.write(row, col+2, power)
-    worksheet.write(row, col+3, price)
+    worksheet.write(row, col + 1, cop)
+    worksheet.write(row, col + 2, power)
+    worksheet.write(row, col + 3, price)
     row += 1
 
 workbook.close()
-
