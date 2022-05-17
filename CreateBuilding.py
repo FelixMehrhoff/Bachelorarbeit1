@@ -7,10 +7,12 @@ from teaser.project import Project
 import teaser.logic.utilities as utilities
 import os
 
+
+
 prj = Project(load_data=True)
 prj.name = 'BA'
 prj.number_of_elements_calc = 2
-prj.merge_windows_calc = True
+prj.merge_windows_calc = False
 prj.used_library_calc = 'AixLib'
 prj._weather_file_path = 'D:\hkr-fme\Projects\TEASER\teaser\data\input\inputdata\weatherdata'
 
@@ -29,6 +31,7 @@ prj.add_residential(
         number_of_floors=4,
         height_of_floors=2.5,
         net_leased_area=200.0)
+
 
 prj.dir_reference_results = utilities.get_full_path(
         os.path.join(
