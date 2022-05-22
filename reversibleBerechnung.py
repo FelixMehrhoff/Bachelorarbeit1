@@ -1,7 +1,10 @@
-
 import xlsxwriter
 
 # requiredVariables
+import DataList
+import math
+import numpy as np
+
 Q_wholeHouse = [2.557, 2.884]  # kW
 T_flow = 70  # °C
 T_return = 60  # °C
@@ -13,40 +16,36 @@ electricityPrice = 0.4  # €/kWh
 counter = 1
 result = []
 
-for i in Q_wholeHouse:
-    # energy balance around the heating;
-    m_heatingCircuit = i / (cp_water * (T_flow - T_return))  # ideal liquid
+x = DataList.getDataList()
+result = {}
+
+for key in x:
+    # from standard conditions to operational conditions
+    Q_operational = x[key][0] * (
+                ((x[key][1] - x[key][2]) / (np.log((x[key][1] - x[key][3]) / (x[key][2] - x[key][3])))) / 10 / (
+            np.log(55 / 45)))
+
+    # energy balance around the heating
+    m_heatingCircuit = Q_operational / (cp_water * (x[key][1] - x[key][2]))  # ideal liquid
 
     # calculate specific q
-    q_heatDemand = i / m_heatingCircuit
+    q_heatDemand = Q_operational / m_heatingCircuit
 
     # entropy balance around the isentropic heat exchanger
     Tm_34 = q_heatDemand / (s3 - s4)
 
-    # specify day:
-    print("For day " + str(counter) + " applies: ")
-
-    # calculate and give out COP
-    COP = 1 / (1 - (Tm_12 + 273.15) / Tm_34)
-    print("The COP of the heat pump is: " + str(COP) + ".")
+    # calculate and add COP to result
+    COP = 1 / (1 - (x[key][4]) / Tm_34)
 
     # calculate and giv out power of heat pump
-    P_el = i / COP
-    print("The power of the heat pump is" + str(P_el) + " kW.")
+    P_el = Q_operational / COP
 
     # calculate and give out costs for electricity
     cost = P_el * electricityPrice
-    print("The costs per hour are" + str(round(cost, 2)) + " €/kWh")
-
-    summary = [counter, round(COP, 2), round(P_el, 2), round(cost, 2)]
-    result.append(summary)
-
-    # count up
-    counter = counter + 1
-
-print(result)
+    result = {key: [COP, P_el, cost]}
 
 # create Excel-file
+"""
 workbook = xlsxwriter.Workbook('results.xlsx')
 worksheet = workbook.add_worksheet()
 worksheet.write('A1', 'Tag')
@@ -65,3 +64,5 @@ for day, cop, power, price in result:
     row += 1
 
 workbook.close()
+
+"""
