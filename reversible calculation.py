@@ -11,13 +11,12 @@ electricityPrice = 0.4  # €/kWh
 counter = 1
 result = []
 
-x = DataList.getDataList()
+x = DataList.getdatalist()
 
 for key in x:
     # from standard conditions to operational conditions
-    Q_operational = x[key][0] * (
-                ((x[key][1] - x[key][2]) / (np.log((x[key][1] - x[key][3]) / (x[key][2] - x[key][3])))) / 10 / (
-            np.log(55 / 45)))
+    Q_operational = x[key][0] * (((x[key][1] - x[key][2]) / (np.log((x[key][1] - x[key][3]) / (x[key][2] - x[key][3]))))
+                                 / 10 / (np.log(55 / 45)))
 
     # energy balance around the heating
     m_heatingCircuit = Q_operational / (cp_water * (x[key][1] - x[key][2]))  # ideal liquid
