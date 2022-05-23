@@ -1,15 +1,10 @@
-import xlsxwriter
 
-# requiredVariables
+import xlsxwriter
 import DataList
-import math
 import numpy as np
 
-Q_wholeHouse = [2.557, 2.884]  # kW
-T_flow = 70  # °C
-T_return = 60  # °C
+# requiredVariables
 cp_water = 4.18  # kJ/(kg*K)
-Tm_12 = 10  # °C, maybe the outside temperature,  evaporation only in wet steam area
 s4 = 1.384  # kJ/kg*K
 s3 = 1.7716  # kJ/kg*K
 electricityPrice = 0.4  # €/kWh
@@ -17,7 +12,6 @@ counter = 1
 result = []
 
 x = DataList.getDataList()
-result = {}
 
 for key in x:
     # from standard conditions to operational conditions

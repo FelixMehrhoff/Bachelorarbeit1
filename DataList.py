@@ -12,9 +12,7 @@ def getDataList ():
 
     # add Data to a list
     x = FilteredData.to_numpy()
-    print(x)
     y = x.tolist()
-    print(y)
 
     DataList = {}
 
