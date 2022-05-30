@@ -9,7 +9,7 @@ s4 = 1.384  # kJ/kg*K
 s3 = 1.7716  # kJ/kg*K
 electricityPrice = 0.4  # €/kWh
 counter = 1
-result = []
+result = {}
 
 x = DataList.getdatalist()
 
@@ -36,6 +36,8 @@ for key in x:
     # calculate and give out costs for electricity
     cost = P_el * electricityPrice
     result = {key: [COP, P_el, cost]}
+print(result)
+
 
 # create Excel-file
 """

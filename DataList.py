@@ -8,9 +8,9 @@ def getdatalist():
     ResultData = TimeSeriesData(r"D:\hkr-fme\Projects\Bachelorarbeit1\Results\results.mat")
 
     # filter DataFrame
-    FilteredData = ResultData.loc[:, ["multizone.TRad[1]", "multizone.TRad[2]"]]
-    # FilteredData = ResultData.loc[:, ["multizone.PHeater[1]", t_flow, t_return, "multizone.TAir[1]", "multizone.weaBus.TDryBul[1]"]]
-    # FilteredData = ResultData.loc[:, ["multizone.zone[1].heaterCooler.Heating.Q_flow", t_flow, t_return, "multizone.TAir[1]", "multizone.weaBus.TDryBul[1]"]]
+    # FilteredData = ResultData.loc[:, ["multizone.TRad[1]", "multizone.TRad[2]"]]
+    # FilteredData = ResultData.loc[:, ["multizone.PHeater[1]", "multizone.TRad[1]", "multizone.TRad[2]", "multizone.TAir[1]", "multizone.weaBus.TDryBul"]]
+    FilteredData = ResultData.loc[:, ["multizone.zone[1].heaterCooler.heatingPower", t_flow, t_return, "multizone.TAir[1]", "multizone.weaBus.TDryBul[1]"]]
 
     # add Data to a list
     x = FilteredData.to_numpy()
@@ -25,6 +25,7 @@ def getdatalist():
 
 # tests
 
+print(getdatalist())
 
 """
 for i in range(0, len(x)):
