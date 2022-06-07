@@ -18,11 +18,11 @@ dymola.openModel(path=os.path.join(dir_model, 'package.mo'))
 dymola.openModel(path=os.path.join(dir_weaData, 'DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR'))
 
 # translate model, which should be simulated
-dymola.translateModel('BA.InstitutVersuchshalle.InstitutVersuchshalle')
+dymola.translateModel('BA.Home.Home')
 
 # simulate model
 output = dymola.simulateExtendedModel(
-        problem='BA.InstitutVersuchshalle.InstitutVersuchshalle',
+        problem='BA.Home.Home',
         startTime=0,
         stopTime=3.1536e+07,
         outputInterval=3600,
