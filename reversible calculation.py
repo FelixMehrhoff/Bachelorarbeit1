@@ -1,7 +1,7 @@
 import Functions
 import numpy as np
 import pandas as pd
-
+import math
 
 def calculateAllCosts(total_zone_number):
 
@@ -24,8 +24,8 @@ def calculateAllCosts(total_zone_number):
 
         # calculate tSupply and tReturn with linear solution
         # source --> https://www.viessmann.de/de/wohngebaeude/ratgeber/heizkurve-einstellen.html
-        tSupply = Functions.t_supply_lin(373.15, 274.15)
-        tReturn = Functions.t_return_lin(353.15, 274.15)
+        tSupply = Functions.t_supply_lin(373.15)
+        tReturn = Functions.t_return_lin(353.15)
 
         # get tLog of the heatpump
         # +2K, then heat transfer always possible
