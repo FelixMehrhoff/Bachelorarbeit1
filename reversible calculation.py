@@ -1,7 +1,8 @@
 import Functions
 import numpy as np
 import pandas as pd
-import math
+
+
 
 def calculateAllCosts(total_zone_number):
 
@@ -17,15 +18,16 @@ def calculateAllCosts(total_zone_number):
         delta_T_log_nom = (tSupplyNom-tReturnNom)/np.log((tSupplyNom-tRoomNom)/(tReturnNom-tRoomNom))  # source -->Supply Temperature Control Concepts, page 51
         tOutsideNom = Functions.t_outside_nom(68159)+273.15  # enter PLZ of weather data, source --> DIN_TS 12831-1
         n = 1.3  # for radiator, source Recknagel, page 1375
+        FilteredData = Functions.get_filtered_data(i)
         tRoomSet = Functions.t_room_set(i)
-        tOutside = Functions.t_outside()
-        heatingDemand = Functions.heating_demand(i)
-        tRoom = Functions.t_room(i)
+        tOutside = FilteredData["TOutside"]
+        heatingDemand = FilteredData["HeatingDemand"]
+        tRoom = FilteredData["TRoom"]
 
         # calculate tSupply and tReturn with linear solution
         # source --> https://www.viessmann.de/de/wohngebaeude/ratgeber/heizkurve-einstellen.html
-        tSupply = Functions.t_supply_lin(373.15)
-        tReturn = Functions.t_return_lin(353.15)
+        tSupply = Functions.t_supply_lin(373.15, i)
+        tReturn = Functions.t_return_lin(353.15, i)
 
         # get tLog of the heatpump
         # +2K, then heat transfer always possible
@@ -51,10 +53,6 @@ def calculateAllCosts(total_zone_number):
 
         # filter data not making sense (tSupply < tRoom)
 
-        for y in data.index:
-            if data['tSupply'][y] < 294.15:
-                data['P_el'][y] = 0
-
         # sum up the costs
         zoneCosts = data['costs'].sum()
         TotalCosts += zoneCosts
@@ -63,10 +61,10 @@ def calculateAllCosts(total_zone_number):
 
 
 TotalZoneNumber = Functions.total_zone()
-c = int(TotalZoneNumber.iloc[0]['raw'])
 
 
-print(calculateAllCosts(c))
+
+print(calculateAllCosts(TotalZoneNumber))
 
 
 """

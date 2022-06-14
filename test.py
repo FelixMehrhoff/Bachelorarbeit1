@@ -1,9 +1,11 @@
 import Functions
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
-y = Functions.supply_my_formula()
-x = Functions.t_supply_lin(373.15)
+data = Functions.get_filtered_data(1)
+x = data["TOutside"]
+y = Functions.t_supply_paper(1)
+z = Functions.t_return_paper(1)
 
-plt.plot(x-y)
-# plt.plot(y)
+plt.scatter(x-273.15, y-273.15)
+plt.scatter(x-273.15, z-273.15)
 plt.show()
