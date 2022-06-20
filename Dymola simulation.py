@@ -29,7 +29,6 @@ output = dymola.simulateExtendedModel(
         method="Dassl",
         tolerance=0.0001,
         resultFile=os.path.join(dir_result, 'results'),
-        finalNames=['multizone.TRad[1]'],
         )
 
 # close Dymola
