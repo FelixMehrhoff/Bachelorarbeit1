@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 
 
-
 def calculate_all_costs_lin(total_zone_number):
 
     TotalCosts = 0

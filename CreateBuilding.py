@@ -31,12 +31,13 @@ prj.add_residential(
         number_of_floors=4,
         height_of_floors=2.5,
         net_leased_area=200.0)
-
+"""
 prj.retrofit_all_buildings(
         year_of_retrofit=2002,
         type_of_retrofit="adv_retrofit",
         window_type='Alu- oder Stahlfenster, Isolierverglasung',
         material='EPS_perimeter_insulation_top_layer')
+"""
 
 prj.dir_reference_results = utilities.get_full_path(
         os.path.join(

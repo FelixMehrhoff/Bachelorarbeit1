@@ -14,14 +14,14 @@ def get_data(zone_number):
 
 
 def get_filtered_data(zone_number):
-    x = pd.DataFrame()
     ResultData = TimeSeriesData(r"D:\hkr-fme\Projects\Bachelorarbeit1\Results\results.mat")
     Data = ResultData[["multizone.zone[" + str(zone_number) + "].PHeater", "multizone.TAir[" + str(zone_number) + "]",
                        "weaDat.weaBus.TDryBul"]]
     Data.columns = ["HeatingDemand", "TRoom", "TOutside"]
-    indexNames = Data[Data["TRoom"] >= 294.15].index
-    Data.drop(indexNames, inplace=True)
-    return Data
+    copy = Data.copy()
+    indexNames = copy[copy["TRoom"] >= 294.15].index
+    copy.drop(indexNames, inplace=True)
+    return copy
 
 
 def t_outside_nom(PLZ):
@@ -66,6 +66,7 @@ def total_zone():
     c = int(ZoneNumber.iloc[0]['raw'])
 
     return c
+
 
 def supply_nom():
     # required variables
