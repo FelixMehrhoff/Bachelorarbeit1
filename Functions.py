@@ -5,16 +5,16 @@ import math
 import numpy as np
 
 
-def get_data(zone_number):
-    ResultData = TimeSeriesData(r"D:\hkr-fme\Projects\Bachelorarbeit1\Results\results.mat")
+def get_data(zone_number, name):
+    ResultData = TimeSeriesData("D:/hkr-fme/Projects/Bachelorarbeit1/Results/results" + name + ".mat")
     Data = ResultData[["multizone.zone[" + str(zone_number) + "].PHeater", "multizone.TAir[" + str(zone_number) + "]",
                        "weaDat.weaBus.TDryBul"]]
     Data.columns = ["HeatingDemand", "TRoom", "TOutside"]
     return Data
 
 
-def get_filtered_data(zone_number):
-    ResultData = TimeSeriesData(r"D:\hkr-fme\Projects\Bachelorarbeit1\Results\results.mat")
+def get_filtered_data(zone_number, name):
+    ResultData = TimeSeriesData("D:/hkr-fme/Projects/Bachelorarbeit1/Results/results" + name + ".mat")
     Data = ResultData[["multizone.zone[" + str(zone_number) + "].PHeater", "multizone.TAir[" + str(zone_number) + "]",
                        "weaDat.weaBus.TDryBul"]]
     Data.columns = ["HeatingDemand", "TRoom", "TOutside"]
@@ -33,35 +33,45 @@ def t_outside_nom(PLZ):
     return data
 
 
-def t_room_set(zoneNumber):
-    ResultData = TimeSeriesData(r"D:\hkr-fme\Projects\Bachelorarbeit1\Results\results.mat")
+def t_room_set(zoneNumber, name):
+    ResultData = TimeSeriesData("D:/hkr-fme/Projects/Bachelorarbeit1/Results/results" + name + ".mat")
     T_Room_Set = ResultData.loc[:, "multizone.zone[" + str(zoneNumber) + "].TSetHeat"]
     c = float(T_Room_Set.iloc[0]['raw'])
     return c
 
 
-def t_supply_lin(maxTSupply, zone_number):
-    FilteredData = get_filtered_data(zone_number)
+def t_supply_lin(maxTSupply, zone_number, name):
+    FilteredData = get_filtered_data(zone_number, name)
     TOutside = FilteredData["TOutside"]
-    Tilt = (294.15-maxTSupply)/(294.15-243.15)
+    TOutNom = get_t_air_nom(zone_number, name)
+    Tilt = (294.15-(maxTSupply+273.15))/(294.15-TOutNom)
     b = 294.15*(1-Tilt)
     tSupply = Tilt*TOutside+b
 
     return tSupply
 
 
-def t_return_lin(maxTSupply, zone_number):
-    FilteredData = get_filtered_data(zone_number)
+def t_return_lin(maxTSupply, zone_number, name):
+    FilteredData = get_filtered_data(zone_number, name)
     TOutside = FilteredData["TOutside"]
-    Tilt = (294.15-maxTSupply)/(294.15-243.15)
+    TOutNom = get_t_air_nom(zone_number, name)
+    Tilt = (294.15-(maxTSupply+273.15))/(294.15-TOutNom)
     b = 294.15*(1-Tilt)
     tReturn = Tilt*TOutside+b
 
     return tReturn
 
 
-def total_zone():
-    ResultData = TimeSeriesData(r"D:\hkr-fme\Projects\Bachelorarbeit1\Results\results.mat")
+def get_q_nom(name):
+    ResultData = TimeSeriesData("D:/hkr-fme/Projects/Bachelorarbeit1/Results/results" + name + ".mat")
+    qNom = ResultData.loc[:, "multizone.zoneParam[1].hHeat"]
+    c = int(qNom.iloc[0]['raw'])
+
+    return c
+
+
+def total_zone(name):
+    ResultData = TimeSeriesData("D:/hkr-fme/Projects/Bachelorarbeit1/Results/results" + name + ".mat")
     ZoneNumber = ResultData.loc[:, "multizone.numZones"]
     c = int(ZoneNumber.iloc[0]['raw'])
 
@@ -89,9 +99,9 @@ def supply_nom():
     return tSupplyOper
 
 
-def supply_my_formula(zone_number):
+def supply_my_formula(zone_number, name):
     # required variable
-    FilteredData = get_filtered_data(zone_number)
+    FilteredData = get_filtered_data(zone_number, name)
     tRoom = FilteredData["TRoom"]
     tOut = FilteredData["TOutside"]
     tRoomNom = 293.15  # K
@@ -108,58 +118,58 @@ def supply_my_formula(zone_number):
     return tSupply
 
 
-def get_t_lim(zone_number):
+def get_t_lim(zone_number, name):
     # source --> Performance of heat pumps retrofitted to radiator heating systems in
     # existing buildings and measures to reduce space heating temperatures, page 4
-    Data = get_filtered_data(zone_number)
+    Data = get_filtered_data(zone_number, name)
     tLim = Data["TOutside"].max()
     return tLim
 
 
-def get_t_air_nom(zone_number):
+def get_t_air_nom(zone_number, name):
     # source --> Performance of heat pumps retrofitted to radiator heating systems in
     # existing buildings and measures to reduce space heating temperatures, page 4
-    Data = get_filtered_data(zone_number)
+    Data = get_filtered_data(zone_number, name)
     tAirNom = Data["TOutside"].min()
     return tAirNom
 
 
-def t_supply_paper(zone_number):
+def t_supply_paper(zone_number, name, t_supply, t_return):
     # source --> Performance of heat pumps retrofitted to radiator heating systems in
     # existing buildings and measures to reduce space heating temperatures, page 4
 
     # reqiured variables
-    Data = get_filtered_data(zone_number)
-    tLim = get_t_lim(zone_number)
-    tAirNom = get_t_air_nom(zone_number)
+    Data = get_filtered_data(zone_number, name)
+    tLim = get_t_lim(zone_number, name)
+    tAirNom = get_t_air_nom(zone_number, name)
     TRoom = Data["TRoom"]
     tOutside = Data["TOutside"]
-    TSupplyNom = 75+273.15
-    TReturnNom = 65+273.15
+    TSupplyNom = t_supply+273.15
+    TReturnNom = t_return+273.15
     n = 1.3
 
     # calculations
-    Q_rel = (tLim-tOutside)/(tLim-tAirNom)
+    Q_rel = Data["HeatingDemand"]/get_q_nom(name)
     TSupply = TRoom + ((((TSupplyNom+TReturnNom)/2)-TRoom)*(Q_rel**(1/n))) + (((TSupplyNom-TReturnNom)/2)*Q_rel)
 
     return TSupply
 
 
-def t_return_paper(zone_number):
+def t_return_paper(zone_number, name, t_supply, t_return):
     # source --> Performance of heat pumps retrofitted to radiator heating systems in
     # existing buildings and measures to reduce space heating temperatures, page 4
 
     # reqiured variables
-    Data = get_filtered_data(zone_number)
-    tLim = get_t_lim(zone_number)
-    tAirNom = get_t_air_nom(zone_number)
+    Data = get_filtered_data(zone_number, name)
+    tLim = get_t_lim(zone_number, name)
+    tAirNom = get_t_air_nom(zone_number, name)
     tOutside = Data["TOutside"]
-    TSupply = t_supply_paper(zone_number)
-    TSupplyNom = 75 + 273.15
-    TReturnNom = 65 + 273.15
+    TSupply = t_supply_paper(zone_number, name, t_supply, t_return)
+    TSupplyNom = t_supply + 273.15
+    TReturnNom = t_return + 273.15
 
     # calulations
-    Q_rel = (tLim - tOutside) / (tLim - tAirNom)
+    Q_rel = Data["HeatingDemand"] / get_q_nom(name)
     TReturn = TSupply - Q_rel*(TSupplyNom-TReturnNom)
 
     return TReturn
