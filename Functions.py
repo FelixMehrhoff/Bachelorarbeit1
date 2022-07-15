@@ -175,3 +175,16 @@ def t_return_paper(zone_number, name, t_supply, t_return):
     return TReturn
 
 
+def get_area (name):
+    ResultData = TimeSeriesData("D:/hkr-fme/Projects/Bachelorarbeit1/Results/results" + name + ".mat")
+    Area = ResultData.loc[:, "multizone.ABuilding"]
+    c = int(Area.iloc[0]['raw'])
+
+    return c
+
+
+def optimal_t_supply(q_nom, spread, n, kA, t_room):
+    c2 = spread/((q_nom/kA)**(1/n))
+    c1 = math.e**c2
+    t_supply = (-c1*(spread+t_room)+t_room)/(1-c1)
+    return t_supply

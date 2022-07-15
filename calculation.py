@@ -4,8 +4,6 @@ import pandas as pd
 import CreateBuilding
 
 
-
-
 def calculate_all_costs_lin(total_zone_number, name, t_supply, t_return):
 
     TotalCosts = 0
@@ -15,7 +13,9 @@ def calculate_all_costs_lin(total_zone_number, name, t_supply, t_return):
     for i in range(1, total_zone_number+1):
 
         # requiredVariables
-        electricityPrice = 0.3619  # €/kWh, source --> https://www.vergleich.de/strompreise.html#:~:text=Der%20aktuelle%20Strom%C2%ADpreis%20liegt%20laut%20Bundes%C2%ADverband%20der%20Energie-,kWh%20pro%20Jahr%20ca.%201.167%20%E2%82%AC%20an%20Strom%C2%ADkosten.
+        electricityPrice = 0.3619  # €/kWh, source --> https://www.vergleich.de/strompreise.html#:~:text=Der%20aktuelle%
+        # 20Strom%C2%ADpreis%20liegt%20laut%20Bundes%C2%ADverband%20der%20Energie-,kWh%20pro%20Jahr%20ca.%201.167%20%E2%
+        # 82%AC%20an%20Strom%C2%ADkosten.
         t_supply_nom = t_supply
         t_return_nom = t_return
         FilteredData = Functions.get_filtered_data(i, name)
@@ -165,11 +165,14 @@ def calculate_all_costs_real(total_zone_number, name, t_supply, t_return):
     TotalCosts = 0
     TotalPower = 0
     AverageCOP = 0
+    relativeCosts = 0
 
     for i in range(1, total_zone_number+1):
 
         # requiredVariables
-        electricityPrice = 0.3619  # €/kWh, source --> https://www.vergleich.de/strompreise.html#:~:text=Der%20aktuelle%20Strom%C2%ADpreis%20liegt%20laut%20Bundes%C2%ADverband%20der%20Energie-,kWh%20pro%20Jahr%20ca.%201.167%20%E2%82%AC%20an%20Strom%C2%ADkosten.
+        electricityPrice = 0.3619  # €/kWh, source --> https://www.vergleich.de/strompreise.html#:~:text=Der%20aktuelle
+        # %20Strom%C2%ADpreis%20liegt%20laut%20Bundes%C2%ADverband%20der%20Energie-,kWh%20pro%20Jahr%20ca.%201.167%20%
+        # E2%82%AC%20an%20Strom%C2%ADkosten.
         FilteredData = Functions.get_filtered_data(i, name)
         tRoomSet = Functions.t_room_set(i, name)
         tOutside = FilteredData["TOutside"]
@@ -215,7 +218,10 @@ def calculate_all_costs_real(total_zone_number, name, t_supply, t_return):
         zoneAverageCOP = zoneCOP / len(data)
         AverageCOP += (zoneAverageCOP / total_zone_number)
 
-    return (TotalCosts, TotalPower, AverageCOP)
+    #costs in ct/kWh
+    relativeCosts = TotalCosts/Functions.get_area(name)
+
+    return (TotalCosts, TotalPower, AverageCOP, relativeCosts)
 
 
 def calculate_cop_real(total_zone_number, name, t_supply, t_return):
@@ -335,10 +341,12 @@ def calculate_total_power_real(total_zone_number, name, t_supply, t_return):
 
 
 # calculate
-
+names1 = 'OuterwallSingleFamilyHouse1840'
 counter = 1
+test = {1: [90,70]}
 temp = {1: [90, 70], 2: [80, 60], 3: [75, 60], 4: [70, 55], 5: [65, 50], 6: [60, 50], 7: [55, 45], 8: [50, 40],
         9: [45, 35], 10: [40, 30]}
+
 # source --> Performance of heat pumps retrofitted to radiator systems in existing
 # buildings and measures to reduce space heating temperatures, page 9
 for i in temp.values():
@@ -348,6 +356,7 @@ for i in temp.values():
     costs_real = []
     COP_real = []
     Power_real = []
+    relativeCosts = []
     counter1 = 0
 
     for name in CreateBuilding.names:
@@ -364,6 +373,7 @@ for i in temp.values():
         costs_real.append(real_results[0])
         Power_real.append(real_results[1])
         COP_real.append(real_results[2])
+        relativeCosts.append(real_results[3])
         counter1 += 1
         print("Step " + str(counter) + "." + str(counter1) + " of " + str(len(temp)) + "." + str(len(CreateBuilding.names)) + " done!")
 
@@ -380,10 +390,11 @@ for i in temp.values():
     col5 = 'costs_real'
     col6 = 'COP_real'
     col7 = 'Power_real'
+    col8 = 'relative_costs'
 
     data_result = pd.DataFrame({col1: CreateBuilding.names, col2: costs_lin, col3: COP_lin, col4: Power_lin,
-                                col5: costs_real, col6: COP_real, col7: Power_real})
-    data_result.to_excel('data_result_tv' + str(i[0]) + 'and_tr' + str(i[1]) + '.xlsx', sheet_name='sheet1',
+                                col5: costs_real, col6: COP_real, col7: Power_real, col8: relativeCosts})
+    data_result.to_excel('data_result_'+CreateBuilding.kind+'_tv' + str(i[0]) + 'and_tr' + str(i[1]) + '.xlsx', sheet_name='sheet1',
                          index=False)
 
 print("Excel file is created. Find: D:\hkr-fme\Projects\Bachelorarbeit1")
